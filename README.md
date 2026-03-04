@@ -1,1 +1,4 @@
-# socialite
+# Social Platform FastApi
+
+# Author 
+Samyam Pradhan
