@@ -1,63 +1,70 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Security
-from sqlalchemy.orm import Session
-from pydantic import BaseModel
-from passlib.hash import bcrypt
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+# app/auth.py
 
-from . import crud, database
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+import bcrypt  # Add this import
+from fastapi.security import OAuth2PasswordBearer
+
+from . import crud, database, schemas
 from .security import create_access_token, verify_token
 
 router = APIRouter()
 
-# OAuth2 scheme for Swagger
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
-class UserCreate(BaseModel):
-    name: str
-    email: str
-    password: str
+# SIGNUP
+@router.post("/signup", response_model=schemas.UserResponse)
+def signup(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
 
-
-# Custom wrapper to show "email" in Swagger instead of "username"
-class OAuth2PasswordRequestFormEmail:
-    """
-    Maps username -> email for OAuth2PasswordRequestForm
-    """
-    def __init__(self, form_data: OAuth2PasswordRequestForm = Depends()):
-        self.email = form_data.username
-        self.password = form_data.password
-
-
-@router.post("/signup")
-def signup(user: UserCreate, db: Session = Depends(database.get_db)):
     existing_user = crud.get_user_by_email(db, user.email)
+
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    new_user = crud.create_user(db, user.name, user.email, user.password)
-    return {"id": new_user.id, "name": new_user.name, "email": new_user.email}
+    new_user = crud.create_user(
+        db,
+        name=user.name,
+        email=user.email,
+        password=user.password
+    )
+
+    return new_user
 
 
+# LOGIN
 @router.post("/login")
-def login(
-    form_data: OAuth2PasswordRequestFormEmail = Depends(),
-    db: Session = Depends(database.get_db)
-):
-    db_user = crud.get_user_by_email(db, form_data.email)
-    if not db_user or not bcrypt.verify(form_data.password, db_user.password):
+def login(user: schemas.UserLogin, db: Session = Depends(database.get_db)):
+
+    db_user = crud.get_user_by_email(db, user.email)
+
+    if not db_user:
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
-    access_token = create_access_token(data={"sub": db_user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    # Verify password using bcrypt directly
+    password_bytes = user.password.encode('utf-8')
+    hashed_bytes = db_user.password.encode('utf-8')
+    
+    if not bcrypt.checkpw(password_bytes, hashed_bytes):
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+
+    token = create_access_token({"sub": db_user.email})
+
+    return {
+        "access_token": token,
+        "token_type": "bearer"
+    }
 
 
+# GET CURRENT USER
 @router.get("/me")
 def get_current_user(
-    current_user_email: str = Security(oauth2_scheme),
+    token: str = Depends(oauth2_scheme),
     db: Session = Depends(database.get_db)
 ):
-    payload = verify_token(current_user_email)
+
+    payload = verify_token(token)
+
     if payload is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -65,5 +72,14 @@ def get_current_user(
         )
 
     email = payload.get("sub")
+
     user = crud.get_user_by_email(db, email)
-    return {"id": user.id, "name": user.name, "email": user.email}
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email
+    }

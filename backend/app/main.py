@@ -1,6 +1,7 @@
 # app/main.py
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from .database import init_db
 from .auth import router as auth_router
 
@@ -9,8 +10,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Create tables
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Your React app's origin
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 init_db()
 
-# Register routes
 app.include_router(auth_router)

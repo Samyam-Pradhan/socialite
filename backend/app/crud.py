@@ -1,10 +1,17 @@
+# app/crud.py
+
 from sqlalchemy.orm import Session
-from passlib.hash import bcrypt
+import bcrypt  # Change this line
 from . import models
 
 
 def create_user(db: Session, name: str, email: str, password: str):
-    hashed_password = bcrypt.hash(password)
+
+    # Hash password using bcrypt directly
+    # Convert password to bytes, hash it, then decode back to string
+    password_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password_bytes, salt).decode('utf-8')
 
     db_user = models.User(
         name=name,
