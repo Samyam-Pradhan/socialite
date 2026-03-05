@@ -279,8 +279,8 @@ function AuthPage() {
                 disabled={isLoading}
                 className={`w-full py-3 px-4 rounded-xl text-white font-medium transition-all transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                   isLogin 
-                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:ring-blue-500' 
-                    : 'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 focus:ring-purple-500'
+                    ? 'bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:ring-blue-500' 
+                    : 'bg-linear-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 focus:ring-purple-500'
                 } ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
                 {isLoading ? (
@@ -328,7 +328,7 @@ function AuthPage() {
         </div>
 
         {/* RIGHT SIDE - ILLUSTRATION */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-purple-600 p-12 flex-col items-center justify-center relative overflow-hidden">
+        <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-blue-600 to-purple-600 p-12 flex-col items-center justify-center relative overflow-hidden">
           {/* Animated circles */}
           <div className="absolute inset-0">
             <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>

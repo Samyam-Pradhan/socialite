@@ -137,10 +137,10 @@ export default function Dashboard() {
       {/* ── LEFT SIDEBAR ── */}
       <aside className="w-64 h-screen sticky top-0 bg-white border-r border-slate-200 flex flex-col p-6">
         <div className="flex items-center gap-3 mb-10 px-2">
-          <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-200">
+          <div className="w-9 h-9 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-200">
             S
           </div>
-          <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
+          <span className="text-2xl font-bold bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
             Socialite
           </span>
         </div>
@@ -173,7 +173,7 @@ export default function Dashboard() {
           ))}
         </nav>
 
-        <button className="flex items-center justify-center gap-2 w-full py-3.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:opacity-90 transition-all mb-8">
+        <button className="flex items-center justify-center gap-2 w-full py-3.5 bg-linear-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:opacity-90 transition-all mb-8">
           <Plus size={20} />
           <span>New Post</span>
         </button>
@@ -231,7 +231,7 @@ export default function Dashboard() {
         <div className="flex gap-5 px-6 py-6 overflow-x-auto no-scrollbar border-b border-slate-100">
           {STORIES.map(s => (
             <div key={s.id} className="flex flex-col items-center gap-2 group cursor-pointer shrink-0">
-              <div className="relative p-0.5 rounded-full bg-gradient-to-tr from-amber-400 to-fuchsia-600 group-hover:scale-105 transition-transform">
+              <div className="relative p-0.5 rounded-full bg-linear-to-tr from-amber-400 to-fuchsia-600 group-hover:scale-105 transition-transform">
                 <div className="bg-white p-0.5 rounded-full">
                   <DefaultAvatar className="w-14 h-14" />
                 </div>
@@ -255,7 +255,7 @@ export default function Dashboard() {
                 value={postText}
                 onChange={(e) => setPostText(e.target.value)}
                 placeholder={`What's on your mind, ${currentUser.name.split(' ')[0]}?`}
-                className="w-full border-none focus:ring-0 text-lg resize-none placeholder:text-slate-400 text-slate-700 min-h-[60px]"
+                className="w-full border-none focus:ring-0 text-lg resize-none placeholder:text-slate-400 text-slate-700 min-h-60px"
               />
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-50">
                 <div className="flex gap-1">
