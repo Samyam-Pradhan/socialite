@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 import bcrypt
 from . import models, schemas
 
-# -------- User CRUD --------
 def create_user(db: Session, name: str, email: str, password: str):
     password_bytes = password.encode("utf-8")
     salt = bcrypt.gensalt()
@@ -26,7 +25,6 @@ def get_user_by_email(db: Session, email: str):
 def get_user_by_id(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
 
-# -------- Post CRUD --------
 def create_post(db: Session, user_id: int, content: str, tag: str = "General"):
     db_post = models.Post(
         user_id=user_id,
