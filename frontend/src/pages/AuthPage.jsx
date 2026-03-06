@@ -103,7 +103,7 @@ function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
       <Navbar />
       
       {/* Background Pattern */}
@@ -123,7 +123,7 @@ function AuthPage() {
               <div className="max-w-md mx-auto">
                 {/* Logo/Brand */}
                 <div className="mb-8">
-                  <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  <h2 className="text-3xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     Socialite
                   </h2>
                   <p className="text-gray-500 mt-2">
@@ -306,7 +306,7 @@ function AuthPage() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform transition-all duration-200 hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 group"
+                    className="w-full py-3 px-4 bg-linear-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform transition-all duration-200 hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 group"
                   >
                     {isLoading ? (
                       <>
@@ -352,7 +352,7 @@ function AuthPage() {
             </div>
 
             {/* Right Side - Illustration */}
-            <div className="lg:w-1/2 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-12 flex flex-col items-center justify-center relative overflow-hidden">
+            <div className="lg:w-1/2 bg-linear-to-br from-blue-600 via-indigo-600 to-purple-600 p-12 flex flex-col items-center justify-center relative overflow-hidden">
               {/* Decorative Elements */}
               <div className="absolute inset-0">
                 <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
@@ -387,15 +387,15 @@ function AuthPage() {
                 {/* Feature List */}
                 <div className="space-y-3 text-left max-w-sm mx-auto">
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="text-green-300 flex-shrink-0" size={20} />
+                    <CheckCircle className="text-green-300 shrink-0" size={20} />
                     <span className="text-white/90">Connect with millions of users</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="text-green-300 flex-shrink-0" size={20} />
+                    <CheckCircle className="text-green-300 shrink-0" size={20} />
                     <span className="text-white/90">Share your thoughts and moments</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="text-green-300 flex-shrink-0" size={20} />
+                    <CheckCircle className="text-green-300 shrink-0" size={20} />
                     <span className="text-white/90">Discover trending topics</span>
                   </div>
                 </div>

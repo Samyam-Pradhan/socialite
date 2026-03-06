@@ -73,7 +73,7 @@ export default function NewPost() {
 
         {/* Author Row */}
         <div className="flex items-center gap-4 mb-8">
-          <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center rounded-full text-indigo-500 border-2 border-white shadow-sm">
+          <div className="w-12 h-12 bg-linear-to-br from-indigo-100 to-purple-100 flex items-center justify-center rounded-full text-indigo-500 border-2 border-white shadow-sm">
             <span className="text-sm font-semibold">{initials}</span>
           </div>
           <div>
@@ -94,7 +94,7 @@ export default function NewPost() {
         {/* Textarea Card */}
         <div className="relative bg-white border border-slate-200 rounded-2xl p-6 focus-within:border-indigo-400 shadow-sm transition-all duration-300">
           <textarea
-            className="w-full bg-transparent outline-none resize-none text-lg leading-relaxed text-slate-700 placeholder:text-slate-400 min-h-[200px]"
+            className="w-full bg-transparent outline-none resize-none text-lg leading-relaxed text-slate-700 placeholder:text-slate-400 min-h-50"
             placeholder={`What's on your mind, ${firstName}?`}
             value={content}
             maxLength={MAX_CHARS}

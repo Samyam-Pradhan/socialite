@@ -12,7 +12,7 @@ const API_URL = "http://localhost:8000";
 
 // ── Avatar ────────────────────────────────────────────────────────────────
 const Avatar = ({ className = "w-10 h-10", initials = "?" }) => (
-  <div className={`${className} rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-indigo-600 font-semibold text-xs border-2 border-white shadow-sm shrink-0`}>
+  <div className={`${className} rounded-full bg-linear-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-indigo-600 font-semibold text-xs border-2 border-white shadow-sm shrink-0`}>
     {initials}
   </div>
 );
@@ -264,10 +264,10 @@ export default function Dashboard() {
       <aside className="w-64 h-screen sticky top-0 bg-white border-r border-slate-200 flex flex-col p-5">
         {/* Logo */}
         <div className="flex items-center gap-3 mb-10 px-2 pt-1">
-          <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+          <div className="w-8 h-8 bg-linear-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
             <Feather size={16} className="text-white" />
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
+          <span className="text-xl font-bold bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
             Socialite
           </span>
         </div>
@@ -292,7 +292,7 @@ export default function Dashboard() {
 
         {/* New Post */}
         <button onClick={() => navigate("/new-post")}
-          className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-bold text-sm transition-all mb-5 shadow-md shadow-indigo-200">
+          className="flex items-center justify-center gap-2 w-full py-3 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-bold text-sm transition-all mb-5 shadow-md shadow-indigo-200">
           <Plus size={17} strokeWidth={2.5} />
           New Post
         </button>
@@ -357,7 +357,7 @@ export default function Dashboard() {
                 value={postText}
                 onChange={e => setPostText(e.target.value)}
                 placeholder={`What's happening, ${currentUserName.split(" ")[0]}?`}
-                className="w-full bg-transparent text-slate-700 placeholder:text-slate-400 text-[15px] leading-relaxed resize-none outline-none min-h-[60px]"
+                className="w-full bg-transparent text-slate-700 placeholder:text-slate-400 text-[15px] leading-relaxed resize-none outline-none min-h-15"
               />
               <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
                 <span className="text-xs text-slate-400">{postText.length > 0 ? `${postText.length} chars` : ""}</span>
