@@ -1,8 +1,8 @@
 # app/posts.py
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query, status
 from typing import List
 from sqlalchemy.orm import Session
-from . import schemas, crud, database, models  # ← Add models here
+from . import schemas, crud, database
 from .auth import get_current_user
 from .models import User
 
@@ -11,35 +11,19 @@ router = APIRouter(
     tags=["posts"]
 )
 
-# ── Routes ───────────────────────────────────────────────────────
 @router.get("/", response_model=List[schemas.PostResponse])
 def get_posts(
-    skip: int = 0,
-    limit: int = 50,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=100),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(database.get_db)
 ):
-    """Get all posts from database"""
-    posts = crud.get_posts(db, skip=skip, limit=limit)
-    
-    # Convert to response format with user_name
-    result = []
-    for post in posts:
-        post_dict = {
-            "id": post.id,
-            "user_id": post.user_id,
-            "user_name": post.user.name if post.user else "Unknown User",
-            "content": post.content,
-            "tag": post.tag,
-            "likes": post.likes,
-            "comments": post.comments,
-            "shares": post.shares,
-            "created_at": post.created_at
-        }
-        result.append(post_dict)
-    
-    return result
+    """Get all posts with like status for current user"""
+    current_user_id = current_user.id if current_user else None
+    posts = crud.get_posts(db, skip=skip, limit=limit, current_user_id=current_user_id)
+    return posts
 
-@router.post("/", response_model=schemas.PostResponse)
+@router.post("/", response_model=schemas.PostResponse, status_code=status.HTTP_201_CREATED)
 def create_post(
     post: schemas.PostCreate,
     current_user: User = Depends(get_current_user),
@@ -47,7 +31,10 @@ def create_post(
 ):
     """Create a new post"""
     if not current_user:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Not authenticated"
+        )
     
     db_post = crud.create_post(
         db, 
@@ -56,50 +43,45 @@ def create_post(
         tag=post.tag
     )
     
-    # Return in the expected format
     return {
         "id": db_post.id,
         "user_id": db_post.user_id,
         "user_name": current_user.name,
+        "user_email": current_user.email,
         "content": db_post.content,
         "tag": db_post.tag,
         "likes": db_post.likes,
         "comments": db_post.comments,
         "shares": db_post.shares,
-        "created_at": db_post.created_at
+        "created_at": db_post.created_at,
+        "is_liked": False
     }
 
-@router.put("/{post_id}/like")
+@router.post("/{post_id}/like")
 def like_post(
     post_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(database.get_db)
 ):
-    """Like a post"""
+    """Toggle like on a post (like/unlike)"""
     if not current_user:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Not authenticated"
+        )
     
-    updated_post = crud.like_post(db, post_id)
-    if not updated_post:
-        raise HTTPException(status_code=404, detail="Post not found")
+    likes_count, liked = crud.toggle_like(db, current_user.id, post_id)
     
-    return {"likes": updated_post.likes}
-
-@router.post("/{post_id}/comment")
-def comment_on_post(
-    post_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(database.get_db)
-):
-    """Add a comment to a post"""
-    if not current_user:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+    if likes_count is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Post not found"
+        )
     
-    updated_post = crud.comment_on_post(db, post_id)
-    if not updated_post:
-        raise HTTPException(status_code=404, detail="Post not found")
-    
-    return {"comments": updated_post.comments}
+    return {
+        "likes": likes_count,
+        "liked": liked
+    }
 
 @router.post("/{post_id}/share")
 def share_post(
@@ -109,38 +91,71 @@ def share_post(
 ):
     """Share a post"""
     if not current_user:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Not authenticated"
+        )
     
     updated_post = crud.share_post(db, post_id)
     if not updated_post:
-        raise HTTPException(status_code=404, detail="Post not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Post not found"
+        )
     
     return {"shares": updated_post.shares}
 
-# Optional: Get posts by user
-@router.get("/user/{user_id}", response_model=List[schemas.PostResponse])
-def get_user_posts(
-    user_id: int,
+@router.delete("/{post_id}")
+def delete_post(
+    post_id: int,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(database.get_db)
 ):
-    """Get all posts by a specific user"""
-    posts = db.query(models.Post)\
-              .filter(models.Post.user_id == user_id)\
-              .order_by(models.Post.created_at.desc())\
-              .all()
+    """Delete a post (only by the owner)"""
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Not authenticated"
+        )
     
-    result = []
-    for post in posts:
-        result.append({
-            "id": post.id,
-            "user_id": post.user_id,
-            "user_name": post.user.name if post.user else "Unknown User",
-            "content": post.content,
-            "tag": post.tag,
-            "likes": post.likes,
-            "comments": post.comments,
-            "shares": post.shares,
-            "created_at": post.created_at
-        })
+    result, message = crud.delete_post(db, post_id, current_user.id)
     
-    return result
+    if not result:
+        if message == "Post not found":
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail=message
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, 
+                detail=message
+            )
+    
+    return {"message": message}
+
+@router.get("/{post_id}/comments", response_model=List[schemas.CommentResponse])
+def get_comments(
+    post_id: int,
+    db: Session = Depends(database.get_db)
+):
+    """Get all comments for a post"""
+    comments = crud.get_post_comments(db, post_id)
+    return comments
+
+@router.post("/{post_id}/comments", response_model=schemas.CommentResponse, status_code=status.HTTP_201_CREATED)
+def create_comment(
+    post_id: int,
+    comment: schemas.CommentCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    """Create a comment on a post"""
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Not authenticated"
+        )
+    
+    db_comment = crud.create_comment(db, current_user.id, post_id, comment.content)
+    return db_comment

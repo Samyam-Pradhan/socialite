@@ -1,177 +1,178 @@
-// NewPost.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, ArrowLeft } from "lucide-react";
+import { ArrowLeft, Feather, Send } from "lucide-react";
 import axios from "axios";
 
-const DefaultAvatar = ({ className = "w-10 h-10" }) => (
-  <div className={`${className} bg-indigo-100 flex items-center justify-center rounded-full text-indigo-500 border border-indigo-200 shrink-0`}>
-    <User size={20} fill="currentColor" fillOpacity={0.2} />
-  </div>
-);
+const API_URL = 'http://localhost:8000';
+const TAGS = ["General", "Tech", "Photography", "Travel", "Design", "Life", "Art"];
 
 export default function NewPost() {
   const [content, setContent] = useState("");
   const [tag, setTag] = useState("General");
+  const [customTag, setCustomTag] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  const MAX_CHARS = 500;
   const currentUserName = localStorage.getItem("user_name") || "User";
   const token = localStorage.getItem("token");
+  const firstName = currentUserName.split(" ")[0];
+  const initials = currentUserName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+  const charCount = content.length;
+  const remaining = MAX_CHARS - charCount;
+  const activeTag = customTag || tag;
 
-  // Redirect to login if not authenticated
   useEffect(() => {
-    if (!token) {
-      navigate("/auth");
-    }
+    if (!token) navigate("/");
   }, [token, navigate]);
 
   const handleSubmit = async () => {
     if (!content.trim()) return;
-
     setIsLoading(true);
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/posts/",
-        {
-          content: content,
-          tag: tag
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
+      await axios.post(
+        `${API_URL}/posts/`,
+        { content, tag: activeTag },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      console.log("Post created:", response.data);
-      
-      // Redirect to dashboard after success - FIXED: changed from "/" to "/dashboard"
       navigate("/dashboard");
     } catch (err) {
-      console.error("Error creating post:", err);
-      if (err.response) {
-        alert(err.response.data?.detail || "Failed to create post");
-      } else {
-        alert("Failed to create post");
-      }
+      alert(err.response?.data?.detail || "Failed to create post");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    // Also redirect to dashboard on cancel
-    navigate("/dashboard");
-  };
+  const remainingColor =
+    remaining < 50 ? "text-rose-500" :
+    remaining < 150 ? "text-amber-500" :
+    "text-slate-400";
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-6 py-4">
-        <div className="max-w-4xl mx-auto flex items-center gap-4">
-          <button
-            onClick={handleCancel}
-            className="p-2 hover:bg-slate-100 rounded-full transition-colors"
-          >
-            <ArrowLeft size={20} className="text-slate-600" />
-          </button>
-          <h1 className="text-xl font-bold text-slate-800">Create New Post</h1>
-        </div>
-      </div>
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
 
-      {/* Main Content */}
-      <div className="max-w-2xl mx-auto p-6">
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          {/* User Info */}
-          <div className="p-6 border-b border-slate-100">
-            <div className="flex items-center gap-3">
-              <DefaultAvatar className="w-12 h-12" />
-              <div>
-                <p className="font-semibold text-slate-900">{currentUserName}</p>
-                <p className="text-sm text-slate-500">Creating a new post</p>
-              </div>
-            </div>
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-md">
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
+        >
+          <ArrowLeft size={16} />
+          Back to Dashboard
+        </button>
+
+        <span className="text-sm font-medium text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
+          New Post
+        </span>
+
+        <div className="w-20"></div> {/* Spacer for alignment */}
+      </header>
+
+      {/* Main Body */}
+      <main className="max-w-2xl mx-auto px-6 py-10">
+
+        {/* Author Row */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center rounded-full text-indigo-500 border-2 border-white shadow-sm">
+            <span className="text-sm font-semibold">{initials}</span>
           </div>
+          <div>
+            <p className="text-lg font-semibold text-slate-900">{currentUserName}</p>
+            <p className="text-sm text-slate-500 mt-1">
+              Creating a new post · {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+            </p>
+          </div>
+        </div>
 
-          {/* Post Form */}
-          <div className="p-6">
-            <textarea
-              className="w-full border border-slate-200 rounded-xl p-4 resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-slate-700 placeholder:text-slate-400 min-h-[150px]"
-              placeholder={`What's on your mind, ${currentUserName.split(' ')[0]}?`}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              autoFocus
-            />
+        {/* Decorative Divider */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="flex-1 h-px bg-slate-200" />
+          <Feather size={16} className="text-indigo-400" />
+          <div className="flex-1 h-px bg-slate-200" />
+        </div>
+
+        {/* Textarea Card */}
+        <div className="relative bg-white border border-slate-200 rounded-2xl p-6 focus-within:border-indigo-400 shadow-sm transition-all duration-300">
+          <textarea
+            className="w-full bg-transparent outline-none resize-none text-lg leading-relaxed text-slate-700 placeholder:text-slate-400 min-h-[200px]"
+            placeholder={`What's on your mind, ${firstName}?`}
+            value={content}
+            maxLength={MAX_CHARS}
+            autoFocus
+            onChange={e => setContent(e.target.value)}
+          />
+          <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-100">
+            <span className={`text-xs font-medium tabular-nums transition-colors ${remainingColor}`}>
+              {remaining} / {MAX_CHARS}
+            </span>
             
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Tag (optional)
-              </label>
-              <input
-                className="w-full border border-slate-200 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-                placeholder="e.g., Tech, Photography, Travel"
-                value={tag}
-                onChange={(e) => setTag(e.target.value)}
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
-              <button
-                onClick={handleCancel}
-                className="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-700 font-medium hover:bg-slate-50 transition-colors"
-                disabled={isLoading}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={!content.trim() || isLoading}
-                className={`px-6 py-2.5 rounded-lg font-medium text-white transition-all ${
-                  content.trim() && !isLoading
-                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90"
-                    : "bg-slate-300 cursor-not-allowed"
-                }`}
-              >
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Posting...
-                  </span>
-                ) : (
-                  'Post'
-                )}
-              </button>
-            </div>
+            {/* Post Button - Right side below text field */}
+            <button
+              onClick={handleSubmit}
+              disabled={!content.trim() || isLoading}
+              className={`flex items-center gap-2 px-6 py-2 text-sm font-semibold rounded-lg transition-all duration-200 shadow-sm
+                ${content.trim() && !isLoading
+                  ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200" 
+                  : "bg-slate-100 text-slate-400 cursor-not-allowed"}`}
+            >
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Posting...
+                </>
+              ) : (
+                <>
+                  <Send size={16} />
+                  Post
+                </>
+              )}
+            </button>
           </div>
         </div>
 
-        {/* Preview Section */}
-        {content && (
-          <div className="mt-6 bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-            <h3 className="text-sm font-medium text-slate-500 mb-3">Preview</h3>
-            <div className="flex gap-4">
-              <DefaultAvatar className="w-10 h-10" />
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-semibold text-slate-900">{currentUserName}</span>
-                  <span className="text-xs text-slate-400">· just now</span>
-                </div>
-                <p className="text-slate-700">{content}</p>
-                {tag !== "General" && (
-                  <span className="inline-block mt-2 text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
-                    {tag}
-                  </span>
-                )}
-              </div>
-            </div>
+        {/* Tag Section */}
+        <div className="mt-8">
+          <p className="text-sm font-semibold text-slate-700 mb-4">
+            Choose a topic
+          </p>
+
+          {/* Preset Pills */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {TAGS.map(t => (
+              <button
+                key={t}
+                onClick={() => { setTag(t); setCustomTag(""); }}
+                className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-200
+                  ${tag === t && !customTag
+                    ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+              >
+                {t}
+              </button>
+            ))}
           </div>
-        )}
-      </div>
+
+          {/* Custom Tag Input - In a box */}
+          <div className="relative">
+            <input
+              className="w-full bg-white border border-slate-200 rounded-lg px-4 py-3 pr-20 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              placeholder="Or add a custom tag..."
+              value={customTag}
+              onChange={e => setCustomTag(e.target.value)}
+            />
+            {customTag && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                <span className="text-xs text-indigo-600 font-medium bg-indigo-50 px-2 py-1 rounded-full">
+                  #{customTag}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

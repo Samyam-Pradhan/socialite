@@ -1,28 +1,27 @@
 # app/auth.py
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 import bcrypt
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError
 
 from . import crud, database, schemas
 from .security import create_access_token, verify_token
-from .models import User  # ← Add this import!
+from .models import User
 
 router = APIRouter()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login", auto_error=False)
 
 
-# SIGNUP
-@router.post("/signup", response_model=schemas.UserResponse)
+@router.post("/signup", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
 def signup(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
-
     existing_user = crud.get_user_by_email(db, user.email)
 
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Email already registered"
+        )
 
     new_user = crud.create_user(
         db,
@@ -34,21 +33,25 @@ def signup(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     return new_user
 
 
-# LOGIN
 @router.post("/login")
 def login(user: schemas.UserLogin, db: Session = Depends(database.get_db)):
-
     db_user = crud.get_user_by_email(db, user.email)
 
     if not db_user:
-        raise HTTPException(status_code=400, detail="Invalid credentials")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Invalid credentials"
+        )
 
-    # Verify password using bcrypt directly
+    # Verify password
     password_bytes = user.password.encode('utf-8')
     hashed_bytes = db_user.password.encode('utf-8')
     
     if not bcrypt.checkpw(password_bytes, hashed_bytes):
-        raise HTTPException(status_code=400, detail="Invalid credentials")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Invalid credentials"
+        )
 
     token = create_access_token({"sub": db_user.email})
 
@@ -58,7 +61,6 @@ def login(user: schemas.UserLogin, db: Session = Depends(database.get_db)):
     }
 
 
-# GET CURRENT USER
 def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(database.get_db)
