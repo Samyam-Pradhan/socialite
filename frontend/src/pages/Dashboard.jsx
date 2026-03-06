@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   Home, Hash, MessageSquare, Bookmark, User, 
   Settings, Bell, Heart, MessageCircle, Share2, 
   Plus, Search, Image as ImageIcon, Smile, TrendingUp,
   LogOut
 } from "lucide-react";
+import axios from "axios";
 
 // ── Default Avatar Component ──────────────────────────────────────────────
 const DefaultAvatar = ({ className = "w-10 h-10" }) => (
@@ -32,7 +34,8 @@ const getCurrentUser = () => {
     const fullName = formatName(userName || userEmail.split('@')[0]);
 
     return {
-      name: fullName,  // This will show the full name (e.g., "Jack Smith")
+      name: fullName,
+      username: `@${userEmail.split('@')[0].toLowerCase()}`,
       followers: 1240,
       following: 380,
       email: userEmail
@@ -40,6 +43,7 @@ const getCurrentUser = () => {
   }
   return {
     name: "Alex Rivera",
+    username: "@alexrivera",
     followers: 1240,
     following: 380,
   };
@@ -54,37 +58,15 @@ const STORIES = [
   { id: 6, name: "Lena" },
 ];
 
-const INITIAL_POSTS = [
-  {
-    id: 1,
-    user: { name: "Priya Sharma", username: "@priyaS" },
-    time: "2m ago",
-    content: "Just shipped a new feature for our app 🚀 Sometimes the best ideas come at 2am. Who else codes late at night?",
-    likes: 142,
-    comments: 28,
-    shares: 14,
-    liked: false,
-    tag: "Tech",
-  },
-  {
-    id: 2,
-    user: { name: "Marcus Lee", username: "@marcuslee" },
-    time: "18m ago",
-    content: "Golden hour hits different when you're in the mountains. No filter needed. 🏔️✨",
-    likes: 389,
-    comments: 52,
-    shares: 31,
-    liked: true,
-    tag: "Photography",
-  },
-];
-
 export default function Dashboard() {
   const [activeNav, setActiveNav] = useState("home");
-  const [posts, setPosts] = useState(INITIAL_POSTS);
+  const [posts, setPosts] = useState([]);
   const [postText, setPostText] = useState("");
   const [feedMode, setFeedMode] = useState("latest");
   const [currentUser, setCurrentUser] = useState(getCurrentUser());
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const navigate = useNavigate();
 
   // Check if user is logged in, redirect to login if not
   useEffect(() => {
@@ -94,41 +76,94 @@ export default function Dashboard() {
     }
   }, []);
 
-  const toggleLike = (id) => {
-    setPosts(prev => prev.map(p =>
-      p.id === id ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 } : p
-    ));
+  // Fetch posts from backend
+  const fetchPosts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:8000/posts/', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      console.log("Fetched posts:", response.data); // Debug log
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handlePost = () => {
+  // Fetch posts when component mounts
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const toggleLike = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.put(`http://localhost:8000/posts/${id}/like`, {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      setPosts(prev => prev.map(p =>
+        p.id === id ? { ...p, likes: response.data.likes } : p
+      ));
+    } catch (error) {
+      console.error('Error liking post:', error);
+    }
+  };
+
+  const handlePost = async () => {
     if (!postText.trim()) return;
-    const newPost = {
-      id: Date.now(),
-      user: {
-        name: currentUser.name,
-        username: `@${currentUser.email.split('@')[0].toLowerCase()}`
-      },
-      time: "just now",
-      content: postText,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      liked: false,
-      tag: "General",
-    };
-    setPosts([newPost, ...posts]);
-    setPostText("");
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        'http://localhost:8000/posts/',
+        { content: postText, tag: "General" },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      setPosts([response.data, ...posts]);
+      setPostText("");
+    } catch (error) {
+      console.error('Error creating post:', error);
+      alert(error.response?.data?.detail || 'Failed to create post');
+    }
   };
 
   const handleLogout = () => {
-    // Clear all user data from localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('token_type');
     localStorage.removeItem('user_email');
     localStorage.removeItem('user_name');
-    
-    // Redirect to auth page
     window.location.href = '/';
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "just now";
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+    if (diffDays === 1) return 'yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   return (
@@ -137,10 +172,10 @@ export default function Dashboard() {
       {/* ── LEFT SIDEBAR ── */}
       <aside className="w-64 h-screen sticky top-0 bg-white border-r border-slate-200 flex flex-col p-6">
         <div className="flex items-center gap-3 mb-10 px-2">
-          <div className="w-9 h-9 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-200">
+          <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-200">
             S
           </div>
-          <span className="text-2xl font-bold bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
+          <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
             Socialite
           </span>
         </div>
@@ -173,18 +208,21 @@ export default function Dashboard() {
           ))}
         </nav>
 
-        <button className="flex items-center justify-center gap-2 w-full py-3.5 bg-linear-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:opacity-90 transition-all mb-8">
+        <button
+          onClick={() => navigate("/new-post")}
+          className="flex items-center justify-center gap-2 w-full py-3.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:opacity-90 transition-all mb-8"
+        >
           <Plus size={20} />
           <span>New Post</span>
         </button>
 
         <div className="space-y-2">
-          {/* User Profile Section - Updated to show only full name */}
+          {/* User Profile Section */}
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
             <DefaultAvatar className="w-10 h-10" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold truncate">{currentUser.name}</p>
-              {/* Username line completely removed - now shows only full name */}
+              <p className="text-xs text-slate-400 truncate">{currentUser.username}</p>
             </div>
             <Settings size={18} className="text-slate-400 cursor-pointer hover:text-indigo-500" />
           </div>
@@ -231,7 +269,7 @@ export default function Dashboard() {
         <div className="flex gap-5 px-6 py-6 overflow-x-auto no-scrollbar border-b border-slate-100">
           {STORIES.map(s => (
             <div key={s.id} className="flex flex-col items-center gap-2 group cursor-pointer shrink-0">
-              <div className="relative p-0.5 rounded-full bg-linear-to-tr from-amber-400 to-fuchsia-600 group-hover:scale-105 transition-transform">
+              <div className="relative p-0.5 rounded-full bg-gradient-to-tr from-amber-400 to-fuchsia-600 group-hover:scale-105 transition-transform">
                 <div className="bg-white p-0.5 rounded-full">
                   <DefaultAvatar className="w-14 h-14" />
                 </div>
@@ -255,7 +293,7 @@ export default function Dashboard() {
                 value={postText}
                 onChange={(e) => setPostText(e.target.value)}
                 placeholder={`What's on your mind, ${currentUser.name.split(' ')[0]}?`}
-                className="w-full border-none focus:ring-0 text-lg resize-none placeholder:text-slate-400 text-slate-700 min-h-60px"
+                className="w-full border-none focus:ring-0 text-lg resize-none placeholder:text-slate-400 text-slate-700 min-h-[60px]"
               />
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-50">
                 <div className="flex gap-1">
@@ -280,46 +318,60 @@ export default function Dashboard() {
 
         {/* Feed Posts */}
         <div className="divide-y divide-slate-100">
-          {posts.map((post) => (
-            <article key={post.id} className="p-6 hover:bg-slate-50/50 transition-colors">
-              <div className="flex gap-4">
-                <DefaultAvatar className="w-11 h-11" />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-bold text-slate-900">{post.user.name}</span>
-                      <span className="text-sm text-slate-400 font-medium">{post.user.username} · {post.time}</span>
+          {isLoading ? (
+            <div className="p-12 text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-500 border-t-transparent"></div>
+              <p className="mt-4 text-slate-500">Loading posts...</p>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="p-12 text-center">
+              <p className="text-slate-500">No posts yet. Be the first to post!</p>
+            </div>
+          ) : (
+            posts.map((post) => (
+              <article key={post.id} className="p-6 hover:bg-slate-50/50 transition-colors">
+                <div className="flex gap-4">
+                  <DefaultAvatar className="w-11 h-11" />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-slate-900">{post.user_name}</span>
+                        <span className="text-sm text-slate-400 font-medium">
+                          @{post.user_name?.toLowerCase().replace(/\s+/g, '')} · {formatDate(post.created_at)}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-full">
+                        {post.tag || "General"}
+                      </span>
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-full">
-                      {post.tag}
-                    </span>
-                  </div>
-                  <p className="text-slate-700 leading-relaxed mb-4">{post.content}</p>
-                  
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-6">
-                    <button 
-                      onClick={() => toggleLike(post.id)}
-                      className={`flex items-center gap-2 text-sm transition-colors ${post.liked ? "text-rose-500" : "text-slate-400 hover:text-rose-500"}`}>
-                      <Heart size={18} fill={post.liked ? "currentColor" : "none"} />
-                      <span className="font-semibold">{post.likes}</span>
-                    </button>
-                    <button className="flex items-center gap-2 text-sm text-slate-400 hover:text-indigo-500 transition-colors">
-                      <MessageCircle size={18} />
-                      <span className="font-semibold">{post.comments}</span>
-                    </button>
-                    <button className="flex items-center gap-2 text-sm text-slate-400 hover:text-green-500 transition-colors">
-                      <Share2 size={18} />
-                      <span className="font-semibold">{post.shares}</span>
-                    </button>
-                    <button className="ml-auto text-slate-300 hover:text-indigo-500">
-                      <Bookmark size={18} />
-                    </button>
+                    <p className="text-slate-700 leading-relaxed mb-4">{post.content}</p>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-6">
+                      <button 
+                        onClick={() => toggleLike(post.id)}
+                        className="flex items-center gap-2 text-sm text-slate-400 hover:text-rose-500 transition-colors"
+                      >
+                        <Heart size={18} />
+                        <span className="font-semibold">{post.likes || 0}</span>
+                      </button>
+                      <button className="flex items-center gap-2 text-sm text-slate-400 hover:text-indigo-500 transition-colors">
+                        <MessageCircle size={18} />
+                        <span className="font-semibold">{post.comments || 0}</span>
+                      </button>
+                      <button className="flex items-center gap-2 text-sm text-slate-400 hover:text-green-500 transition-colors">
+                        <Share2 size={18} />
+                        <span className="font-semibold">{post.shares || 0}</span>
+                      </button>
+                      <button className="ml-auto text-slate-300 hover:text-indigo-500">
+                        <Bookmark size={18} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            ))
+          )}
         </div>
       </main>
 
@@ -371,7 +423,6 @@ export default function Dashboard() {
           </p>
         </footer>
       </aside>
-
     </div>
   );
 }

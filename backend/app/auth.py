@@ -2,15 +2,17 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-import bcrypt  # Add this import
+import bcrypt
 from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError
 
 from . import crud, database, schemas
 from .security import create_access_token, verify_token
+from .models import User  # ← Add this import!
 
 router = APIRouter()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login", auto_error=False)
 
 
 # SIGNUP
@@ -57,29 +59,36 @@ def login(user: schemas.UserLogin, db: Session = Depends(database.get_db)):
 
 
 # GET CURRENT USER
-@router.get("/me")
 def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(database.get_db)
 ):
-
+    if not token:
+        return None
+    
     payload = verify_token(token)
 
     if payload is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token"
-        )
+        return None
 
     email = payload.get("sub")
+    
+    if not email:
+        return None
 
     user = crud.get_user_by_email(db, email)
+    return user
 
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
 
+@router.get("/me")
+def read_users_me(current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
     return {
-        "id": user.id,
-        "name": user.name,
-        "email": user.email
+        "id": current_user.id,
+        "name": current_user.name,
+        "email": current_user.email
     }
