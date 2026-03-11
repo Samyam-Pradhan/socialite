@@ -55,15 +55,11 @@ export default function NewPost() {
       setLoading(false);
     }
   };
-
-  /* ring color for char counter */
   const ringColor = remaining < 50 ? "#EF4444" : remaining < 150 ? "#F59E0B" : P;
 
   return (
     <div className="min-h-screen bg-linear-to-br from-purple-50 via-white to-purple-50 py-8 px-4">
       <div className="max-w-3xl mx-auto">
-        
-        {/* Back button */}
         <button
           onClick={() => navigate("/dashboard")}
           className="group flex items-center gap-2 bg-white border border-purple-100 rounded-full px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#6322D9] hover:border-[#6322D9] hover:bg-purple-50/50 transition-all shadow-sm hover:shadow mb-6"
