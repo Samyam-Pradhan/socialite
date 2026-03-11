@@ -20,8 +20,6 @@ const Avatar = ({ className = "w-10 h-10", initials = "?" }) => (
 
 const getInitials = (name = "") =>
   name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() || "?";
-
-// ── Comments Modal ────────────────────────────────────────────────────────
 const CommentsModal = ({ post, onClose, onCommentAdded }) => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -120,8 +118,6 @@ const CommentsModal = ({ post, onClose, onCommentAdded }) => {
     </div>
   );
 };
-
-// ── Dashboard ─────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const [activeNav, setActiveNav] = useState("home");
   const [posts, setPosts] = useState([]);

@@ -7,15 +7,12 @@ import {
   Feather, Sparkles, Trash2,
 } from "lucide-react";
 
-/* ── Design tokens ─────────────────────────────────────────────────── */
 const P   = "#7818DD";
 const PL  = "#9B4EE8";
 const PD  = "#5A0FAD";
 const PBG = "rgba(120,24,221,0.07)";
 const PBR = "rgba(120,24,221,0.18)";
 const PGL = "rgba(120,24,221,0.25)";
-
-/* ── Style helpers ──────────────────────────────────────────────────── */
 const card = {
   background: "#fff",
   border: "1px solid #EDE8F7",
@@ -35,7 +32,6 @@ const inputBase = {
   transition: "border-color 0.2s, box-shadow 0.2s",
 };
 
-/* ── Delete Confirm Modal ───────────────────────────────────────────── */
 const DeleteConfirmModal = ({ post, onClose, onDelete }) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -110,7 +106,6 @@ const DeleteConfirmModal = ({ post, onClose, onDelete }) => {
   );
 };
 
-/* ── Main Component ─────────────────────────────────────────────────── */
 export default function Profile({ onBackToDashboard }) {
   const [activeTab, setActiveTab] = useState("posts");
   const [user,      setUser]      = useState(null);
@@ -158,7 +153,6 @@ export default function Profile({ onBackToDashboard }) {
       const { data } = await axios.get("http://localhost:8000/posts/liked", auth());
       setLikedPosts(data);
     } catch (e) {
-      // Fallback: filter from all posts if endpoint doesn't exist
       try {
         const { data: allPosts } = await axios.get("http://localhost:8000/posts/", auth());
         setLikedPosts(allPosts.filter(p => p.is_liked));
