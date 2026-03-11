@@ -7,7 +7,6 @@ const API_URL = "http://localhost:8000";
 const TAGS = ["General", "Tech", "Photography", "Travel", "Design", "Life", "Art", "Music", "Food"];
 const MAX_CHARS = 500;
 
-/* ── Design tokens (matching Profile) ──────────────────────────────── */
 const P    = "#6322D9";
 const PL   = "#8A4DFF";
 const PD   = "#4A1AA8";
@@ -15,7 +14,6 @@ const PBG  = "rgba(99,34,217,0.07)";
 const PBR  = "rgba(99,34,217,0.18)";
 const PGL  = "rgba(99,34,217,0.22)";
 
-/* ── Tag chip colors cycling through purple tints ─────────────────── */
 const TAG_COLORS = [
   { bg: "rgba(99,34,217,0.08)",  border: "rgba(99,34,217,0.2)",  color: "#6322D9" },
   { bg: "rgba(139,92,246,0.08)",  border: "rgba(139,92,246,0.2)",  color: "#8B5CF6" },
@@ -62,7 +60,7 @@ export default function NewPost() {
   const ringColor = remaining < 50 ? "#EF4444" : remaining < 150 ? "#F59E0B" : P;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 py-8 px-4">
+    <div className="min-h-screen bg-linear-to-br from-purple-50 via-white to-purple-50 py-8 px-4">
       <div className="max-w-3xl mx-auto">
         
         {/* Back button */}
@@ -76,7 +74,7 @@ export default function NewPost() {
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6322D9] to-[#8A4DFF] flex items-center justify-center shadow-md shadow-purple-200">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#6322D9] to-[#8A4DFF] flex items-center justify-center shadow-md shadow-purple-200">
             <Feather size={20} className="text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-800">Create New Post</h1>
@@ -86,8 +84,8 @@ export default function NewPost() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden">
           
           {/* User header */}
-          <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-purple-50/30 to-transparent flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#6322D9] to-[#8A4DFF] flex items-center justify-center text-white font-semibold text-sm shadow-md shadow-purple-200">
+          <div className="px-6 py-4 border-b border-gray-100 bg-linear-to-r from-purple-50/30 to-transparent flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#6322D9] to-[#8A4DFF] flex items-center justify-center text-white font-semibold text-sm shadow-md shadow-purple-200">
               {initials}
             </div>
             <div className="flex-1">
@@ -117,7 +115,7 @@ export default function NewPost() {
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
               placeholder={`What's on your mind, ${firstName}?`}
-              className={`w-full min-h-[200px] p-4 text-gray-700 placeholder-gray-400 bg-gray-50 rounded-xl border transition-all resize-none outline-none ${
+              className={`w-full min-h-50 p-4 text-gray-700 placeholder-gray-400 bg-gray-50 rounded-xl border transition-all resize-none outline-none ${
                 focused 
                   ? 'border-[#6322D9] ring-2 ring-purple-100' 
                   : 'border-gray-200 hover:border-gray-300'
@@ -158,7 +156,7 @@ export default function NewPost() {
                 disabled={!canPost}
                 className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-medium text-sm transition-all ${
                   canPost
-                    ? 'bg-gradient-to-r from-[#6322D9] to-[#8A4DFF] text-white shadow-md shadow-purple-200 hover:shadow-lg hover:-translate-y-0.5'
+                    ? 'bg-linear-to-r from-[#6322D9] to-[#8A4DFF] text-white shadow-md shadow-purple-200 hover:shadow-lg hover:-translate-y-0.5'
                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 }`}
               >
@@ -182,7 +180,7 @@ export default function NewPost() {
 
         {/* Tag Selection Card */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-xl mt-6 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-purple-50/30 to-transparent flex items-center gap-2">
+          <div className="px-6 py-4 border-b border-gray-100 bg-linear-to-r from-purple-50/30 to-transparent flex items-center gap-2">
             <Hash size={18} className="text-[#6322D9]" />
             <h2 className="font-semibold text-gray-800">Choose a topic</h2>
           </div>
