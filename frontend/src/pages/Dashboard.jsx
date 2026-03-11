@@ -2,55 +2,24 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Home, Hash, MessageSquare, Bookmark, User,
-  Settings, Bell, Heart, MessageCircle, Share2,
-  Plus, Search, TrendingUp, LogOut, X, Send, Trash2,
+  Bell, Heart, MessageCircle, Share2,
+  Plus, Search, TrendingUp, LogOut, X, Send,
   Feather, Flame, Clock
 } from "lucide-react";
 import axios from "axios";
+import Profile from "./Profile";
 
 const API_URL = "http://localhost:8000";
+const BRAND_COLOR = "#762EF8";
 
-// ── Avatar ────────────────────────────────────────────────────────────────
 const Avatar = ({ className = "w-10 h-10", initials = "?" }) => (
-  <div className={`${className} rounded-full bg-linear-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-indigo-600 font-semibold text-xs border-2 border-white shadow-sm shrink-0`}>
+  <div className={`${className} rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs border-2 border-white shadow-sm shrink-0`}>
     {initials}
   </div>
 );
 
 const getInitials = (name = "") =>
   name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() || "?";
-
-// ── Delete Modal ──────────────────────────────────────────────────────────
-const DeleteConfirmModal = ({ post, onClose, onDelete }) => {
-  const [isDeleting, setIsDeleting] = useState(false);
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    await onDelete(post.id);
-    setIsDeleting(false);
-    onClose();
-  };
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-7 shadow-xl" onClick={e => e.stopPropagation()}>
-        <h3 className="text-lg font-bold text-slate-800 mb-1">Delete this post?</h3>
-        <p className="text-sm text-slate-500 mb-5">This action cannot be undone.</p>
-        <div className="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-200">
-          <p className="text-slate-600 text-sm line-clamp-2">{post.content}</p>
-        </div>
-        <div className="flex gap-3">
-          <button onClick={onClose} disabled={isDeleting}
-            className="flex-1 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
-            Cancel
-          </button>
-          <button onClick={handleDelete} disabled={isDeleting}
-            className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors disabled:opacity-50">
-            {isDeleting ? "Deleting…" : "Delete"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // ── Comments Modal ────────────────────────────────────────────────────────
 const CommentsModal = ({ post, onClose, onCommentAdded }) => {
@@ -93,42 +62,39 @@ const CommentsModal = ({ post, onClose, onCommentAdded }) => {
   if (!post) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-xl" onClick={e => e.stopPropagation()}>
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <span className="font-bold text-slate-800 tracking-tight">Comments</span>
-          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-full transition-colors">
+    <div className="fixed inset-0 bg-indigo-950/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white border border-indigo-100 rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl shadow-indigo-100" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-indigo-50">
+          <span className="font-bold text-slate-900 tracking-tight">Comments</span>
+          <button onClick={onClose} className="p-1.5 hover:bg-indigo-50 rounded-full transition-colors">
             <X size={16} className="text-slate-500" />
           </button>
         </div>
-        {/* Post preview */}
-        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
+        <div className="px-6 py-4 border-b border-indigo-50 bg-indigo-50/30">
           <div className="flex gap-3">
             <Avatar className="w-9 h-9" initials={getInitials(post.user_name)} />
             <div>
-              <span className="text-sm font-semibold text-slate-800">{post.user_name}</span>
+              <span className="text-sm font-semibold text-slate-900">{post.user_name}</span>
               <p className="text-sm text-slate-600 mt-0.5">{post.content}</p>
             </div>
           </div>
         </div>
-        {/* Comments list */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           {isLoading ? (
             <div className="text-center py-10">
-              <div className="inline-block animate-spin rounded-full h-5 w-5 border-2 border-indigo-500 border-t-transparent" />
+              <div className="inline-block animate-spin rounded-full h-5 w-5 border-2 border-t-transparent" style={{ borderColor: `${BRAND_COLOR}33`, borderTopColor: BRAND_COLOR }} />
             </div>
           ) : comments.length === 0 ? (
             <div className="text-center py-10">
-              <MessageCircle size={32} className="mx-auto text-slate-300 mb-2" />
+              <MessageCircle size={32} className="mx-auto text-indigo-200 mb-2" />
               <p className="text-sm text-slate-400">No comments yet.</p>
             </div>
           ) : comments.map(c => (
             <div key={c.id} className="flex gap-3">
               <Avatar className="w-8 h-8" initials={getInitials(c.user_name)} />
-              <div className="flex-1 bg-slate-50 rounded-xl px-4 py-3">
+              <div className="flex-1 bg-indigo-50/40 rounded-xl px-4 py-3 border border-indigo-50">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-semibold text-slate-800">{c.user_name}</span>
+                  <span className="text-xs font-semibold text-slate-900">{c.user_name}</span>
                   <span className="text-[10px] text-slate-400">{new Date(c.created_at).toLocaleDateString()}</span>
                 </div>
                 <p className="text-sm text-slate-600">{c.content}</p>
@@ -136,17 +102,17 @@ const CommentsModal = ({ post, onClose, onCommentAdded }) => {
             </div>
           ))}
         </div>
-        {/* Input */}
-        <form onSubmit={handleSubmit} className="px-6 py-4 border-t border-slate-200 flex gap-3">
+        <form onSubmit={handleSubmit} className="px-6 py-4 border-t border-indigo-50 flex gap-3">
           <input
             value={newComment}
             onChange={e => setNewComment(e.target.value)}
             placeholder="Add a comment…"
-            className="flex-1 bg-slate-50 border border-slate-200 rounded-full px-4 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-colors"
+            className="flex-1 bg-indigo-50/40 border border-indigo-100 rounded-full px-4 py-2.5 text-sm text-slate-700 placeholder:text-indigo-300 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-colors"
             disabled={isSubmitting}
           />
           <button type="submit" disabled={!newComment.trim() || isSubmitting}
-            className={`p-2.5 rounded-full transition-all ${newComment.trim() && !isSubmitting ? "bg-indigo-600 text-white hover:bg-indigo-700" : "bg-slate-100 text-slate-400 cursor-not-allowed"}`}>
+            className={`p-2.5 rounded-full transition-all ${newComment.trim() && !isSubmitting ? "text-white shadow-md shadow-indigo-200" : "bg-indigo-50 text-indigo-300 cursor-not-allowed"}`}
+            style={newComment.trim() && !isSubmitting ? { backgroundColor: BRAND_COLOR } : {}}>
             <Send size={16} />
           </button>
         </form>
@@ -164,8 +130,6 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState(null);
   const [showComments, setShowComments] = useState(false);
-  const [postToDelete, setPostToDelete] = useState(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -213,16 +177,6 @@ export default function Dashboard() {
     } catch (e) { if (e.response?.status === 401) handleAuthError(); }
   };
 
-  const handleDelete = async (postId) => {
-    try {
-      await axios.delete(`${API_URL}/posts/${postId}`, { headers: { Authorization: `Bearer ${token}` } });
-      setPosts(prev => prev.filter(p => p.id !== postId));
-    } catch (e) {
-      if (e.response?.status === 401) handleAuthError();
-      else alert(e.response?.status === 403 ? "You can only delete your own posts" : "Failed to delete post");
-    }
-  };
-
   const handleLogout = () => {
     ["token", "token_type", "user_email", "user_name"].forEach(k => localStorage.removeItem(k));
     navigate("/");
@@ -250,237 +204,257 @@ export default function Dashboard() {
 
   const TRENDING = ["#WebDev", "#AIart", "#Socialite", "#Design"];
 
-  return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900">
+  const userPosts = posts.filter(p => p.user_email === currentUserEmail);
+  const totalLikes = userPosts.reduce((sum, post) => sum + (post.likes || 0), 0);
 
-      {showDeleteConfirm && postToDelete && (
-        <DeleteConfirmModal post={postToDelete} onClose={() => { setShowDeleteConfirm(false); setPostToDelete(null); }} onDelete={handleDelete} />
-      )}
+  if (activeNav === "profile") {
+    return <Profile onBackToDashboard={() => setActiveNav("home")} />;
+  }
+
+  return (
+    <div className="flex min-h-screen bg-white text-slate-900" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+        * { font-family: 'DM Sans', sans-serif; }
+        .feed-scroll::-webkit-scrollbar { width: 3px; }
+        .feed-scroll::-webkit-scrollbar-track { background: transparent; }
+        .feed-scroll::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 10px; }
+        .post-action-btn { transition: transform 0.15s ease, color 0.15s ease; }
+        .post-action-btn:hover { transform: scale(1.15); }
+        .nav-item { transition: all 0.18s cubic-bezier(0.4,0,0.2,1); }
+        .liked-heart { animation: heartPop 0.3s ease; }
+        @keyframes heartPop { 0%{transform:scale(1)} 40%{transform:scale(1.35)} 100%{transform:scale(1)} }
+        .composer-input::placeholder { color: #a5b4fc; }
+        .brand-glow { box-shadow: 0 4px 24px rgba(118, 46, 248, 0.18); }
+      `}</style>
+
       {showComments && (
         <CommentsModal post={selectedPost} onClose={() => { setShowComments(false); setSelectedPost(null); }} onCommentAdded={fetchPosts} />
       )}
 
       {/* ── LEFT SIDEBAR ── */}
-      <aside className="w-64 h-screen sticky top-0 bg-white border-r border-slate-200 flex flex-col p-5">
-        {/* Logo */}
-        <div className="flex items-center gap-3 mb-10 px-2 pt-1">
-          <div className="w-8 h-8 bg-linear-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
-            <Feather size={16} className="text-white" />
-          </div>
-          <span className="text-xl font-bold bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
-            Socialite
-          </span>
-        </div>
-
-        {/* Nav */}
-        <nav className="flex-1 space-y-0.5">
-          {NAV.map(item => (
-            <button key={item.id} onClick={() => setActiveNav(item.id)}
-              className={`w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl transition-all duration-150 ${
-                activeNav === item.id
-                  ? "bg-indigo-50 text-indigo-600"
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-              }`}>
-              <item.icon size={19} strokeWidth={activeNav === item.id ? 2.5 : 1.8} />
-              <span className="font-semibold text-sm flex-1 text-left">{item.label}</span>
-              {item.badge && (
-                <span className="bg-indigo-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{item.badge}</span>
-              )}
-            </button>
-          ))}
-        </nav>
-
-        {/* New Post */}
-        <button onClick={() => navigate("/new-post")}
-          className="flex items-center justify-center gap-2 w-full py-3 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-bold text-sm transition-all mb-5 shadow-md shadow-indigo-200">
-          <Plus size={17} strokeWidth={2.5} />
-          New Post
-        </button>
-
-        {/* User Box - Separate Box */}
-        <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 mb-2">
-          <div className="flex items-center gap-3">
-            <Avatar className="w-9 h-9" initials={initials} />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-slate-800 truncate">{currentUserName}</p>
-              <p className="text-xs text-slate-500 truncate">@{(currentUserEmail || "user").split("@")[0]}</p>
+      <aside className="w-72 h-screen sticky top-0 bg-white border-r border-indigo-50 flex flex-col" style={{ minWidth: '18rem' }}>
+        <div className="flex-1 px-5 pt-7 flex flex-col">
+          <div className="flex items-center gap-3 mb-10 px-2">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg" style={{ backgroundColor: BRAND_COLOR, boxShadow: `0 10px 15px -3px ${BRAND_COLOR}44` }}>
+              <Feather size={18} className="text-white" />
             </div>
-            <button className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors">
-              <Settings size={15} />
+            <span className="text-2xl font-extrabold tracking-tight" style={{ color: BRAND_COLOR }}>Socialite</span>
+          </div>
+
+          <nav className="flex-1 space-y-1">
+            {NAV.map(item => {
+              const isActive = activeNav === item.id;
+              return (
+                <button key={item.id} onClick={() => setActiveNav(item.id)}
+                  className={`nav-item w-full flex items-center gap-4 px-4 py-3 rounded-2xl ${
+                    isActive
+                      ? "text-white shadow-md"
+                      : "text-slate-500 hover:bg-indigo-50 hover:text-indigo-600"
+                  }`}
+                  style={isActive ? { backgroundColor: BRAND_COLOR, boxShadow: `0 4px 6px -1px ${BRAND_COLOR}33` } : {}}>
+                  <item.icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
+                  <span className={`font-${isActive ? "bold" : "semibold"} text-sm flex-1 text-left`}>{item.label}</span>
+                  {item.badge && (
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${isActive ? "bg-white/20 text-white" : "bg-indigo-100 text-indigo-600"}`}>
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="mt-6 mb-2 flex flex-col gap-2">
+            <button onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl border border-indigo-50 transition-colors">
+              <LogOut size={15} />
+              Sign out
+            </button>
+            <button onClick={() => navigate("/new-post")}
+              className="flex items-center justify-center gap-2.5 w-full py-3.5 text-white rounded-2xl font-bold text-sm transition-all shadow-lg brand-glow"
+              style={{ backgroundColor: BRAND_COLOR }}>
+              <Plus size={18} strokeWidth={2.5} />
+              New Post
             </button>
           </div>
         </div>
-
-        {/* Logout Button - Separate Box */}
-        <button 
-          onClick={handleLogout} 
-          className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-red-500 hover:text-red-600 hover:bg-red-50 rounded-xl border border-slate-200 transition-colors"
-        >
-          <LogOut size={16} />
-          Logout
-        </button>
       </aside>
 
       {/* ── MAIN FEED ── */}
-      <main className="flex-1 max-w-xl border-r border-slate-200 min-h-screen bg-white">
-
-        {/* Header */}
-        <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-          <h1 className="text-lg font-bold text-slate-800 tracking-tight">Home</h1>
+      <main className="flex-1 min-h-screen bg-white border-r border-indigo-50" style={{ maxWidth: '680px' }}>
+        <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-lg border-b border-indigo-50 px-7 py-4 flex items-center justify-between">
+          <h1 className="text-xl font-extrabold text-slate-900 tracking-tight capitalize">{activeNav}</h1>
           <div className="flex items-center gap-3">
-            {/* Feed toggle */}
-            <div className="flex bg-slate-100 border border-slate-200 rounded-lg p-0.5">
-              <button onClick={() => setFeedMode("latest")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${feedMode === "latest" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>
-                <Clock size={11} />
-                Latest
-              </button>
-              <button onClick={() => setFeedMode("trending")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${feedMode === "trending" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>
-                <Flame size={11} />
-                Hot
-              </button>
-            </div>
-            <button className="relative p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition-colors">
+            {activeNav === "home" && (
+              <div className="flex bg-indigo-50 border border-indigo-100 rounded-xl p-0.5">
+                <button onClick={() => setFeedMode("latest")}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all ${feedMode === "latest" ? "bg-white shadow-sm" : "text-slate-400 hover:text-indigo-500"}`}
+                  style={feedMode === "latest" ? { color: BRAND_COLOR } : {}}>
+                  <Clock size={11} />
+                  Latest
+                </button>
+                <button onClick={() => setFeedMode("trending")}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all ${feedMode === "trending" ? "bg-white shadow-sm" : "text-slate-400 hover:text-indigo-500"}`}
+                  style={feedMode === "trending" ? { color: BRAND_COLOR } : {}}>
+                  <Flame size={11} />
+                  Hot
+                </button>
+              </div>
+            )}
+            <button className="relative p-2.5 text-slate-400 hover:bg-indigo-50 rounded-xl transition-colors" style={{ hover: { color: BRAND_COLOR } }}>
               <Bell size={18} />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-indigo-600 rounded-full" />
+              <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full ring-2 ring-white" style={{ backgroundColor: BRAND_COLOR }} />
             </button>
           </div>
         </header>
 
         {/* Composer */}
-        <div className="px-6 py-5 border-b border-slate-200">
-          <div className="flex gap-3">
-            <Avatar className="w-9 h-9 mt-0.5" initials={initials} />
-            <div className="flex-1">
-              <textarea
-                value={postText}
-                onChange={e => setPostText(e.target.value)}
-                placeholder={`What's happening, ${currentUserName.split(" ")[0]}?`}
-                className="w-full bg-transparent text-slate-700 placeholder:text-slate-400 text-[15px] leading-relaxed resize-none outline-none min-h-15"
-              />
-              <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
-                <span className="text-xs text-slate-400">{postText.length > 0 ? `${postText.length} chars` : ""}</span>
-                <button onClick={handlePost} disabled={!postText.trim()}
-                  className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${postText.trim() ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-200" : "bg-slate-100 text-slate-400 cursor-not-allowed"}`}>
-                  Post
-                </button>
+        {activeNav === "home" && (
+          <div className="px-7 py-6 border-b border-indigo-50">
+            <div className="flex gap-4">
+              <Avatar className="w-10 h-10 mt-0.5" initials={initials} />
+              <div className="flex-1">
+                <textarea
+                  value={postText}
+                  onChange={e => setPostText(e.target.value)}
+                  placeholder={`What's on your mind, ${currentUserName.split(" ")[0]}?`}
+                  className="composer-input w-full bg-transparent text-slate-700 text-base leading-relaxed resize-none outline-none min-h-[4rem]"
+                />
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-indigo-50">
+                  <span className="text-xs font-medium text-indigo-300">
+                    {postText.length > 0 ? `${postText.length} / 280` : ""}
+                  </span>
+                  <button onClick={handlePost} disabled={!postText.trim()}
+                    className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${postText.trim() ? "text-white shadow-md shadow-indigo-200" : "bg-indigo-50 text-indigo-300 cursor-not-allowed"}`}
+                    style={postText.trim() ? { backgroundColor: BRAND_COLOR } : {}}>
+                    Post
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Feed */}
+        {/* Feed content */}
         <div>
-          {isLoading ? (
-            <div className="py-16 text-center">
-              <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-indigo-600 border-t-transparent" />
-              <p className="mt-3 text-sm text-slate-500">Loading feed…</p>
-            </div>
-          ) : posts.length === 0 ? (
-            <div className="py-16 text-center">
-              <Feather size={28} className="mx-auto text-slate-300 mb-3" />
-              <p className="text-slate-500 text-sm">No posts yet. Be the first!</p>
-            </div>
-          ) : posts.map((post) => (
-            <article key={post.id}
-              className="px-6 py-5 border-b border-slate-100 hover:bg-slate-50/50 transition-colors group">
-              <div className="flex gap-3">
-                <Avatar className="w-9 h-9 mt-0.5" initials={getInitials(post.user_name)} />
-                <div className="flex-1 min-w-0">
-                  {/* Meta row */}
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div>
-                      <span className="font-semibold text-slate-800 text-sm">{post.user_name}</span>
-                      <span className="text-slate-500 text-xs ml-2">@{post.user_name?.toLowerCase().replace(/\s+/g, "")} · {formatDate(post.created_at)}</span>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] font-medium uppercase tracking-wider text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">
-                        {post.tag || "General"}
-                      </span>
-                      {post.user_email === currentUserEmail && (
-                        <button onClick={() => { setPostToDelete(post); setShowDeleteConfirm(true); }}
-                          className="p-1 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
-                          <Trash2 size={13} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <p className="text-slate-700 text-[15px] leading-relaxed mb-4">{post.content}</p>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-5">
-                    <button onClick={() => handleLike(post.id)}
-                      className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${post.is_liked ? "text-rose-500" : "text-slate-500 hover:text-rose-500"}`}>
-                      <Heart size={15} fill={post.is_liked ? "currentColor" : "none"} />
-                      {post.likes || 0}
-                    </button>
-                    <button onClick={() => { setSelectedPost(post); setShowComments(true); }}
-                      className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-indigo-600 transition-colors">
-                      <MessageCircle size={15} />
-                      {post.comments || 0}
-                    </button>
-                    <button onClick={() => handleShare(post.id)}
-                      className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-green-600 transition-colors">
-                      <Share2 size={15} />
-                      {post.shares || 0}
-                    </button>
-                    <button className="ml-auto text-slate-400 hover:text-indigo-600 transition-colors">
-                      <Bookmark size={15} />
-                    </button>
-                  </div>
+          {activeNav === "home" && (
+            <>
+              {isLoading ? (
+                <div className="py-20 text-center">
+                  <div className="inline-block animate-spin rounded-full h-7 w-7 border-2 border-t-transparent" style={{ borderColor: `${BRAND_COLOR}33`, borderTopColor: BRAND_COLOR }} />
+                  <p className="mt-4 text-sm font-medium text-indigo-300">Loading feed…</p>
                 </div>
-              </div>
-            </article>
-          ))}
+              ) : posts.length === 0 ? (
+                <div className="py-20 text-center">
+                  <div className="w-16 h-16 bg-indigo-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                    <Feather size={28} className="text-indigo-400" />
+                  </div>
+                  <p className="text-slate-500 font-medium">No posts yet. Be the first!</p>
+                </div>
+              ) : posts.map((post) => (
+                <article key={post.id}
+                  className="px-7 py-6 border-b border-indigo-50 hover:bg-indigo-50/20 transition-colors group">
+                  <div className="flex gap-4">
+                    <Avatar className="w-10 h-10 mt-0.5" initials={getInitials(post.user_name)} />
+                    <div className="flex-1 min-w-0">
+                      {/* Meta */}
+                      <div className="flex items-start justify-between gap-2 mb-2.5">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="font-bold text-slate-900 text-sm">{post.user_name}</span>
+                          <span className="text-indigo-300 text-xs">·</span>
+                          <span className="text-slate-400 text-xs font-medium">@{post.user_name?.toLowerCase().replace(/\s+/g, "")}</span>
+                          <span className="text-indigo-300 text-xs">·</span>
+                          <span className="text-slate-400 text-xs">{formatDate(post.created_at)}</span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-full" style={{ color: BRAND_COLOR }}>
+                            {post.tag || "General"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <p className="text-slate-700 text-[15px] leading-relaxed mb-4">{post.content}</p>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-6">
+                        <button onClick={() => handleLike(post.id)}
+                          className={`post-action-btn flex items-center gap-2 text-xs font-semibold transition-colors ${post.is_liked ? "text-rose-500" : "text-slate-400 hover:text-rose-500"}`}>
+                          <Heart size={16} fill={post.is_liked ? "currentColor" : "none"} className={post.is_liked ? "liked-heart" : ""} />
+                          {post.likes || 0}
+                        </button>
+                        <button onClick={() => { setSelectedPost(post); setShowComments(true); }}
+                          className="post-action-btn flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-indigo-600 transition-colors">
+                          <MessageCircle size={16} />
+                          {post.comments || 0}
+                        </button>
+                        <button onClick={() => handleShare(post.id)}
+                          className="post-action-btn flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-emerald-600 transition-colors">
+                          <Share2 size={16} />
+                          {post.shares || 0}
+                        </button>
+                        <button className="post-action-btn ml-auto text-slate-400 hover:text-indigo-600 transition-colors">
+                          <Bookmark size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </>
+          )}
+          {/* ... other nav states ... */}
         </div>
       </main>
 
       {/* ── RIGHT SIDEBAR ── */}
-      <aside className="hidden lg:flex flex-col w-80 p-6 gap-6 h-screen sticky top-0 bg-white">
-
-        {/* Search - Larger */}
+      <aside className="hidden lg:flex flex-col flex-1 px-7 py-7 gap-6 h-screen sticky top-0 bg-white min-w-[280px]">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300" size={17} />
           <input
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-12 pr-4 text-base text-slate-700 placeholder:text-slate-400 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-colors"
+            className="w-full bg-indigo-50/60 border border-indigo-100 rounded-2xl py-3 pl-11 pr-4 text-sm text-slate-700 placeholder:text-indigo-300 outline-none focus:border-indigo-400 focus:ring-3 focus:ring-indigo-100 transition-all font-medium"
             placeholder="Search Socialite…"
           />
         </div>
 
-        {/* Trending - Larger without numbers */}
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
-          <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-5 flex items-center gap-2">
-            <TrendingUp size={16} className="text-indigo-600" />
+        <div className="bg-indigo-50/40 border border-indigo-100 rounded-2xl p-5">
+          <h3 className="text-xs font-extrabold uppercase tracking-widest text-indigo-400 mb-4 flex items-center gap-2">
+            <TrendingUp size={14} style={{ color: BRAND_COLOR }} />
             Trending
           </h3>
-          <div className="space-y-4">
-            {TRENDING.map((tag) => (
-              <div key={tag} className="group cursor-pointer">
-                <p className="text-base font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors">{tag}</p>
-                <p className="text-xs text-slate-500 mt-1">24.5K posts</p>
+          <div className="space-y-3">
+            {TRENDING.map((tag, i) => (
+              <div key={tag} className="group cursor-pointer flex items-center justify-between py-1.5">
+                <div>
+                  <p className="text-sm font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">{tag}</p>
+                  <p className="text-[11px] text-indigo-300 font-medium mt-0.5">24.5K posts</p>
+                </div>
+                <span className="text-xs font-bold text-indigo-200">#{i + 1}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Stats - Larger */}
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
-          <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-5">Your Stats</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {[["1,240", "Followers"], ["380", "Following"], [String(posts.filter(p => p.user_email === currentUserEmail).length), "Posts"], ["4.2K", "Impressions"]].map(([val, label]) => (
-              <div key={label} className="bg-white border border-slate-100 rounded-xl p-4 text-center">
-                <p className="text-xl font-bold text-indigo-600">{val}</p>
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mt-1">{label}</p>
+        <div className="bg-indigo-50/40 border border-indigo-100 rounded-2xl p-5">
+          <h3 className="text-xs font-extrabold uppercase tracking-widest text-indigo-400 mb-4">Your Stats</h3>
+          <div className="grid grid-cols-2 gap-2.5">
+            {[
+              ["1,240", "Followers"],
+              ["380", "Following"],
+              [String(userPosts.length), "Posts"],
+              [String(totalLikes), "Likes"]
+            ].map(([val, label]) => (
+              <div key={label} className="bg-white border border-indigo-100 rounded-xl p-4 text-center">
+                <p className="text-xl font-extrabold" style={{ color: BRAND_COLOR }}>{val}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">{label}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <footer className="mt-auto text-center">
-          <p className="text-xs text-slate-400 font-medium">© 2026 Socialite · Privacy · Terms</p>
+        <footer className="mt-auto">
+          <p className="text-[11px] text-indigo-300 font-medium">© 2026 Socialite · Privacy · Terms</p>
         </footer>
       </aside>
     </div>

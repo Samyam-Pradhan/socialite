@@ -1,4 +1,3 @@
-# app/posts.py
 from fastapi import APIRouter, HTTPException, Depends, Query, status
 from typing import List
 from sqlalchemy.orm import Session
@@ -21,6 +20,21 @@ def get_posts(
     """Get all posts with like status for current user"""
     current_user_id = current_user.id if current_user else None
     posts = crud.get_posts(db, skip=skip, limit=limit, current_user_id=current_user_id)
+    return posts
+
+@router.get("/user", response_model=List[schemas.PostResponse])
+def get_user_posts(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    """Get posts for the current user"""
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Not authenticated"
+        )
+    
+    posts = crud.get_user_posts(db, current_user.id)
     return posts
 
 @router.post("/", response_model=schemas.PostResponse, status_code=status.HTTP_201_CREATED)

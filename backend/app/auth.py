@@ -1,4 +1,3 @@
-# app/auth.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 import bcrypt
@@ -8,10 +7,9 @@ from . import crud, database, schemas
 from .security import create_access_token, verify_token
 from .models import User
 
-router = APIRouter()
+router = APIRouter(tags=["authentication"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login", auto_error=False)
-
 
 @router.post("/signup", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
 def signup(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
@@ -31,7 +29,6 @@ def signup(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     )
 
     return new_user
-
 
 @router.post("/login")
 def login(user: schemas.UserLogin, db: Session = Depends(database.get_db)):
@@ -60,7 +57,6 @@ def login(user: schemas.UserLogin, db: Session = Depends(database.get_db)):
         "token_type": "bearer"
     }
 
-
 def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(database.get_db)
@@ -80,7 +76,6 @@ def get_current_user(
 
     user = crud.get_user_by_email(db, email)
     return user
-
 
 @router.get("/me")
 def read_users_me(current_user: User = Depends(get_current_user)):

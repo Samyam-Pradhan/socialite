@@ -1,4 +1,3 @@
-# app/schemas.py
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional, List
@@ -20,6 +19,27 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class UserProfile(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    bio: Optional[str] = None
+    location: Optional[str] = None
+    website: Optional[str] = None
+    avatar: Optional[str] = None
+    username: Optional[str] = None
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+class UserProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    bio: Optional[str] = None
+    location: Optional[str] = None
+    website: Optional[str] = None
+    email: Optional[EmailStr] = None
 
 # -------- Post Schemas --------
 class PostCreate(BaseModel):
@@ -45,23 +65,12 @@ class PostResponse(BaseModel):
 # -------- Comment Schemas --------
 class CommentCreate(BaseModel):
     content: str
-    post_id: int
 
 class CommentResponse(BaseModel):
     id: int
     content: str
     user_id: int
     user_name: str
-    post_id: int
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-# -------- Like Schemas --------
-class LikeResponse(BaseModel):
-    id: int
-    user_id: int
     post_id: int
     created_at: datetime
 

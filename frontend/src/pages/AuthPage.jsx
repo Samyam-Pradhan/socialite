@@ -80,7 +80,6 @@ function AuthPage() {
           
           localStorage.setItem('user_name', formattedName);
           
-          // Show success message before redirect
           alert("Login Successful! 🎉");
           window.location.href = '/dashboard';
         }
@@ -103,19 +102,12 @@ function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <Navbar />
-      
-      {/* Background Pattern */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse animation-delay-2000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse animation-delay-4000"></div>
-      </div>
 
       {/* Main Container */}
       <div className="relative z-10 container mx-auto px-4 py-8 flex items-center justify-center min-h-[calc(100vh-80px)]">
-        <div className="w-full max-w-6xl bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20">
+        <div className="w-full max-w-7xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
           <div className="flex flex-col lg:flex-row">
             
             {/* Left Side - Form */}
@@ -123,7 +115,7 @@ function AuthPage() {
               <div className="max-w-md mx-auto">
                 {/* Logo/Brand */}
                 <div className="mb-8">
-                  <h2 className="text-3xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     Socialite
                   </h2>
                   <p className="text-gray-500 mt-2">
@@ -306,7 +298,7 @@ function AuthPage() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3 px-4 bg-linear-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform transition-all duration-200 hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 group"
+                    className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform transition-all duration-200 hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 group"
                   >
                     {isLoading ? (
                       <>
@@ -351,14 +343,13 @@ function AuthPage() {
               </div>
             </div>
 
-            {/* Right Side - Illustration */}
-            <div className="lg:w-1/2 bg-linear-to-br from-blue-600 via-indigo-600 to-purple-600 p-12 flex flex-col items-center justify-center relative overflow-hidden">
+            {/* Right Side - Illustration (fully static, never changes) */}
+            <div className="lg:w-1/2 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-12 flex flex-col items-center justify-center relative overflow-hidden">
               {/* Decorative Elements */}
               <div className="absolute inset-0">
                 <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
                 <div className="absolute bottom-0 right-0 w-64 h-64 bg-white/10 rounded-full translate-x-1/2 translate-y-1/2"></div>
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/5 rounded-full"></div>
-                
                 {/* Grid Pattern */}
                 <div className="absolute inset-0" style={{
                   backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.1) 1px, transparent 0)',
@@ -366,25 +357,23 @@ function AuthPage() {
                 }}></div>
               </div>
 
-              {/* Content */}
-              <div className="relative z-10 text-center text-white">
+              {/* Static Content — never changes on toggle */}
+              <div className="relative z-10 text-center text-white flex flex-col items-center">
                 <img
                   src="https://illustrations.popsy.co/gray/work-from-home.svg"
                   alt="Authentication illustration"
-                  className="w-80 h-auto mx-auto mb-8 drop-shadow-2xl"
+                  className="w-[420px] h-auto mx-auto mb-10 drop-shadow-2xl"
                 />
-                
+
                 <h2 className="text-3xl font-bold mb-4">
-                  {isLogin ? "Welcome Back!" : "Join Our Community"}
+                  Your World, Connected
                 </h2>
-                
-                <p className="text-white/90 text-lg max-w-md mx-auto mb-8">
-                  {isLogin 
-                    ? "Connect with friends and the world around you on Socialite." 
-                    : "Create your account and start sharing your moments with the world."}
+
+                <p className="text-white/85 text-lg max-w-md mx-auto mb-8">
+                  Socialite brings people together — share your moments, explore trending topics, and stay connected with the people who matter most.
                 </p>
 
-                {/* Feature List */}
+                {/* Static Feature List */}
                 <div className="space-y-3 text-left max-w-sm mx-auto">
                   <div className="flex items-center gap-3">
                     <CheckCircle className="text-green-300 shrink-0" size={20} />
@@ -396,21 +385,7 @@ function AuthPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="text-green-300 shrink-0" size={20} />
-                    <span className="text-white/90">Discover trending topics</span>
-                  </div>
-                </div>
-
-                {/* Testimonial */}
-                <div className="mt-8 p-4 bg-white/10 backdrop-blur-sm rounded-xl max-w-sm mx-auto">
-                  <p className="text-sm text-white/80 italic">
-                    "Socialite has completely changed how I connect with people. It's amazing!"
-                  </p>
-                  <div className="mt-2 flex items-center gap-2">
-                    <div className="w-8 h-8 bg-white/20 rounded-full"></div>
-                    <div className="text-left">
-                      <p className="text-sm font-semibold">Alex Johnson</p>
-                      <p className="text-xs text-white/60">@alexj</p>
-                    </div>
+                    <span className="text-white/90">Discover trending topics daily</span>
                   </div>
                 </div>
               </div>
@@ -424,6 +399,7 @@ function AuthPage() {
                 <div className="w-2 h-2 bg-white/40 rounded-full"></div>
               </div>
             </div>
+
           </div>
         </div>
       </div>

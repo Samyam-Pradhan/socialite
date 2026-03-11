@@ -1,4 +1,3 @@
-# app/models.py
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -11,6 +10,11 @@ class User(Base):
     name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
+    bio = Column(Text, nullable=True)
+    location = Column(String, nullable=True)
+    website = Column(String, nullable=True)
+    avatar = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     posts = relationship("Post", back_populates="user", cascade="all, delete-orphan")
     comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
@@ -36,7 +40,6 @@ class Post(Base):
 
 class Comment(Base):
     __tablename__ = "comments"
-    __table_args__ = (UniqueConstraint('user_id', 'post_id', name='unique_user_post_comment'),)
 
     id = Column(Integer, primary_key=True, index=True)
     content = Column(Text, nullable=False)

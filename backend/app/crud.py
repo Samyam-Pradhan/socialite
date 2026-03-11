@@ -1,4 +1,3 @@
-# app/crud.py
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 import bcrypt
@@ -13,7 +12,10 @@ def create_user(db: Session, name: str, email: str, password: str):
     db_user = models.User(
         name=name,
         email=email,
-        password=hashed_password
+        password=hashed_password,
+        bio="",
+        location="",
+        website=""
     )
 
     db.add(db_user)
@@ -26,6 +28,29 @@ def get_user_by_email(db: Session, email: str):
 
 def get_user_by_id(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
+
+def update_user_profile(db: Session, user_id: int, user_data: dict):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not db_user:
+        return None
+    
+    for key, value in user_data.items():
+        if value is not None and hasattr(db_user, key):
+            setattr(db_user, key, value)
+    
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def update_user_avatar(db: Session, user_id: int, avatar_url: str):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not db_user:
+        return None
+    
+    db_user.avatar = avatar_url
+    db.commit()
+    db.refresh(db_user)
+    return db_user
 
 # -------- Post CRUD --------
 def create_post(db: Session, user_id: int, content: str, tag: str = "General"):
@@ -58,6 +83,38 @@ def get_posts(db: Session, skip: int = 0, limit: int = 50, current_user_id: int 
                 )
             ).first()
             is_liked = like is not None
+        
+        result.append({
+            "id": post.id,
+            "user_id": post.user_id,
+            "user_name": post.user.name if post.user else "Unknown User",
+            "user_email": post.user.email if post.user else "",
+            "content": post.content,
+            "tag": post.tag,
+            "likes": post.likes,
+            "comments": post.comments,
+            "shares": post.shares,
+            "created_at": post.created_at,
+            "is_liked": is_liked
+        })
+    
+    return result
+
+def get_user_posts(db: Session, user_id: int):
+    posts = db.query(models.Post)\
+             .filter(models.Post.user_id == user_id)\
+             .order_by(models.Post.created_at.desc())\
+             .all()
+    
+    result = []
+    for post in posts:
+        # Check if current user liked their own posts
+        is_liked = db.query(models.Like).filter(
+            and_(
+                models.Like.user_id == user_id,
+                models.Like.post_id == post.id
+            )
+        ).first() is not None
         
         result.append({
             "id": post.id,
